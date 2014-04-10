@@ -65,6 +65,9 @@ int textSize = 2;
 uint8_t rotation = 1;
 uint16_t foregroundColor, backgroundColor;
 
+double imgsize = 0;
+double sizecnt = 0;
+
 int ledPin = 5; // PWM LED Backlight control to digital pin 5
 
 uint8_t rgb565hi, rgb565lo;
@@ -143,11 +146,14 @@ void loop(void) {
                         tft.spiwrite(rgb565hi);
                         tft.spiwrite(rgb565lo);
                         cntenable = 1;
+                        sizecnt++;
                         x = 0;
                 }
                 else if (cntenable == 1) {
-                        if (x > 2) {
+                        if (sizecnt == 76800 || x > 2) {
                                 cntenable = 0;
+                                sizecnt = 0;
+                                Serial.print(sizecnt);
                                 tft.setcsbit();
                                 switchstate(NOTSPECIAL);
                                 Serial.print("NOTSPECIAL Sart");
@@ -407,11 +413,15 @@ int parsechar(unsigned char current_char) {
                                 return 0;
 
                         case 'i':
+                                
+                               
                                 tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
                                 col = tmpnum;
                                 endImage.row = row;
                                 endImage.col = col;
-
+                                
+                                imgsize = (endImage.row - startImage.row)*(endImage.col - startImage.col)*2;
+               
                                 tft.setAddrWindow(startImage.row, startImage.col, endImage.row, endImage.col);
                                 tft.setdcbit();
                                 tft.clearcsbit();
