@@ -86,7 +86,7 @@ void setup() {
         tft.begin();
         // initialize the digital pin as an output for LED Backlibht
         pinMode(ledPin, OUTPUT);
-        analogWrite(ledPin, 128);
+        analogWrite(ledPin, 200);
 
         timer1_setup();
 
@@ -104,6 +104,8 @@ void setup() {
         tft.setCursor(50, 50);
         tft.print("Hello ODROID!");
         tft.setCursor(250, 200);
+        
+        
         tft.print("v1.0");
 
         delay(1000);
@@ -150,7 +152,7 @@ void loop(void) {
                         x = 0;
                 }
                 else if (cntenable == 1) {
-                        if (sizecnt == 76800 || x > 2) {
+                        if ((sizecnt == 76800) || (x > 2)) {
                                 cntenable = 0;
                                 sizecnt = 0;
                                 Serial.print(sizecnt);
@@ -384,7 +386,7 @@ int parsechar(unsigned char current_char) {
 
                         case 'q':
                                 if (tmpnum == 0) {
-                                        analogWrite(ledPin, 128);
+                                        analogWrite(ledPin, 200);
                                 } 
                                 else {
                                         analogWrite(ledPin, LOW);
@@ -420,7 +422,7 @@ int parsechar(unsigned char current_char) {
                                 endImage.row = row;
                                 endImage.col = col;
                                 
-                                imgsize = (endImage.row - startImage.row)*(endImage.col - startImage.col)*2;
+                                imgsize = (endImage.row - startImage.row)*(endImage.col - startImage.col);
                
                                 tft.setAddrWindow(startImage.row, startImage.col, endImage.row, endImage.col);
                                 tft.setdcbit();
