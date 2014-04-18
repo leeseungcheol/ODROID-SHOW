@@ -5,12 +5,14 @@
 
 #define baudrate	B500000
 
+const char serialPort[] = "/dev/ttyUSB0";
+
 int main(void)
 {
 	int usbdev;
 	struct termios options;
 
-	usbdev = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+	usbdev = open(serialPort, O_RDWR | O_NOCTTY | O_NDELAY);
 
 	if (usbdev == -1)
 		perror("open_port : Unable to open:");
