@@ -41,8 +41,8 @@
 #define DEBUG
 
 typedef struct cursor {
-        unsigned int row;
-        unsigned int col;
+        uint32_t row;
+        uint32_t col;
 }
 cursor;
 
@@ -50,25 +50,26 @@ cursor cursor_sav = {
         0, 0 };
 cursor startImage, endImage;
 
-unsigned long x = 0;
+uint32_t x = 0;
+uint8_t c;
 
-int current_state = NOTSPECIAL;
-int previous_state = NOTSPECIAL;
-int tmpnum;
-int n, c;
+uint8_t current_state = NOTSPECIAL;
+uint8_t previous_state = NOTSPECIAL;
+uint32_t tmpnum;
 
-unsigned int num, row, col;
-int bottom_edge0 = BOTTOM_EDGE240;
-int right_edge0  = RIGHT_EDGE320;
 
-int textSize = 2;
+uint16_t num, row, col;
+uint16_t bottom_edge0 = BOTTOM_EDGE240;
+uint16_t right_edge0  = RIGHT_EDGE320;
+
+uint8_t textSize = 2;
 uint8_t rotation = 1;
 uint16_t foregroundColor, backgroundColor;
 
-double imgsize = 0;
-double sizecnt = 0;
+uint32_t imgsize = 0;
+uint32_t sizecnt = 0;
 
-int ledPin = 5; // PWM LED Backlight control to digital pin 5
+uint8_t ledPin = 5; // PWM LED Backlight control to digital pin 5
 
 uint8_t rgb565hi, rgb565lo;
 
@@ -104,8 +105,8 @@ void setup() {
         tft.setCursor(50, 50);
         tft.print("Hello ODROID!");
         tft.setCursor(250, 200);
-        
-        
+
+
         tft.print("v1.0");
 
         delay(1000);
@@ -152,7 +153,7 @@ void loop(void) {
                         x = 0;
                 }
                 else if (cntenable == 1) {
-                        if ((sizecnt == 76800) || (x > 2)) {
+                        if ((sizecnt == imgsize) || (x > 2)) {
                                 cntenable = 0;
                                 sizecnt = 0;
                                 Serial.print(sizecnt);
@@ -252,7 +253,7 @@ int parsechar(unsigned char current_char) {
                 } 
                 else {
                         switch (current_char) {
-                                
+
                         case 'A':        // Keyboard UP Arrow
                                 if (tft.cursor_y == TOP_EDGE0)
                                         break;
@@ -415,16 +416,14 @@ int parsechar(unsigned char current_char) {
                                 return 0;
 
                         case 'i':
-                                
-                               
+
+
                                 tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
                                 col = tmpnum;
                                 endImage.row = row;
                                 endImage.col = col;
-                                
-                                imgsize = (endImage.row - startImage.row)*(endImage.col - startImage.col);
-				Serial.print(imgsize, DEC);
-               
+                                imgsize = (endImage.row - startImage.row + 1)*(endImage.col - startImage.col + 1);    
+
                                 tft.setAddrWindow(startImage.row, startImage.col, endImage.row, endImage.col);
                                 tft.setdcbit();
                                 tft.clearcsbit();
@@ -468,3 +467,4 @@ uint16_t change_mColor(int opt) {
                 return ILI9340_BLACK;
         } 
 }
+
