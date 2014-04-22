@@ -1,17 +1,17 @@
 #!/bin/bash
 
 flag=0
+serialPort="/dev/ttyUSB0"
+
 trap "flag=1" SIGINT SIGKILL SIGTERM
+
 ./port_open &
 subppid=$!
-
-serialPort="/dev/ttyUSB0"
 
 DATA[0]="ODROID"
 DATA[1]="SHOW"
 
 echo -ne "\e[5s\e[0r" > $serialPort
-
 sleep 0.1
 echo -ne "\ec" > $serialPort
 sleep 0.1
@@ -19,6 +19,7 @@ sleep 0.1
 while true
 do
 	if [ $flag -ne 0 ] ; then
+		echo -ne "\ec\e[2s\e[1r" > $serialPort
 		kill $subppid
 		exit
 	fi
