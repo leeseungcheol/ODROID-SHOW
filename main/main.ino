@@ -423,6 +423,7 @@ int parsechar(unsigned char current_char) {
                                 endImage.col = col;
                                 
                                 imgsize = (endImage.row - startImage.row)*(endImage.col - startImage.col);
+				Serial.print(imgsize, DEC);
                
                                 tft.setAddrWindow(startImage.row, startImage.col, endImage.row, endImage.col);
                                 tft.setdcbit();
@@ -464,17 +465,6 @@ uint16_t change_mColor(int opt) {
         case 7:
                 return ILI9340_WHITE;
         case 9:
-                return ILI9340_WHITE;
+                return ILI9340_BLACK;
         } 
 }
-
-
-
-
-
-
-
-
-
-
-
