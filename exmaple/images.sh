@@ -8,6 +8,7 @@ trap "flag=1" SIGINT SIGKILL SIGTERM
 ./port_open &
 subppid=$!
 
+sleep 0.1
 echo -ne "\ec\e[0r" > $serial
 sleep 0.3
 

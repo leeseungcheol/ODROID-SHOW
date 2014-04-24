@@ -20,8 +20,6 @@ function cpu_state {
 while true
 do
 	if [ $flag -ne 0 ] ; then
-		#echo -ne "\ec\e[2s\e[1r" > $serialPort
-		#sleep 0.1
 		kill $subppid
 		exit
 	fi

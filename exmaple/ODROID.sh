@@ -11,6 +11,7 @@ subppid=$!
 DATA[0]="ODROID"
 DATA[1]="SHOW"
 
+sleep 0.1
 echo -ne "\e[5s\e[0r" > $serialPort
 sleep 0.1
 echo -ne "\ec" > $serialPort
