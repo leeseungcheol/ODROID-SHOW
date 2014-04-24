@@ -81,7 +81,7 @@ uint8_t cntenable = 0;
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
 
 void setup() {
-        Serial.begin(500000); //576000 921600 1000000 1152000 1500000 2000000
+        Serial.begin(500000);
         Serial.println("Welcome to the odroid_show");
 
         tft.begin();
@@ -90,6 +90,7 @@ void setup() {
         analogWrite(ledPin, 200);
 
         timer1_setup();
+        delay(1000);
 
         if (analogRead(3) > 450 && analogRead(3) < 550)
                 testFillScreen();
@@ -414,10 +415,8 @@ int parsechar(unsigned char current_char) {
                                 tmpnum = 0;
 
                                 return 0;
-
+                                
                         case 'i':
-
-
                                 tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
                                 col = tmpnum;
                                 endImage.row = row;
@@ -430,7 +429,7 @@ int parsechar(unsigned char current_char) {
                                 switchstate(IMGSHOW);
                                 Serial.println("cat the raw data image");
                                 return 0;
-
+                                
                         }
                         switchstate(NOTSPECIAL);
                         return 0;
@@ -467,4 +466,5 @@ uint16_t change_mColor(int opt) {
                 return ILI9340_BLACK;
         } 
 }
+
 
