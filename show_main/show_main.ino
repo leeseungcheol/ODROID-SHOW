@@ -90,7 +90,7 @@ void setup() {
         analogWrite(ledPin, 200);
 
         timer1_setup();
-        delay(1000);
+        delay(1500);
 
         if (analogRead(3) > 450 && analogRead(3) < 550)
                 testFillScreen();
@@ -387,12 +387,7 @@ int parsechar(unsigned char current_char) {
                                 break;
 
                         case 'q':
-                                if (tmpnum == 0) {
-                                        analogWrite(ledPin, 200);
-                                } 
-                                else {
-                                        analogWrite(ledPin, LOW);
-                                }
+                                analogWrite(ledPin, tmpnum);
                                 break;
 
                         case 'n':
