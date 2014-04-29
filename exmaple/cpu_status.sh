@@ -9,7 +9,7 @@ trap "flag=1" SIGINT SIGKILL SIGTERM
 subppid=$!
 
 sleep 0.1
-echo -ne "\ec\e[2s\e[3r" > $serialPort
+echo -ne "\ec\e[2s\e[1r" > $serialPort
 sleep 0.1
 
 function cpu_state {

@@ -138,7 +138,7 @@ int main(void)
 		cpuData[i].userPeriod = 0;
 	}
 
-	sprintf(buffer, "\ec\e[2s\e[3r");
+	sprintf(buffer, "\ec\e[2s\e[1r");
 	write(usbdev, buffer, strlen(buffer) + 1);
 	fsync(usbdev);
 
