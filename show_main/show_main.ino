@@ -65,7 +65,7 @@ uint16_t bottom_edge0 = BOTTOM_EDGE240;
 uint16_t right_edge0  = RIGHT_EDGE320;
 
 uint8_t textSize = 2;
-uint8_t rotation = 3;
+uint8_t rotation = 1;
 uint16_t foregroundColor, backgroundColor;
 
 uint32_t imgsize = 0;
