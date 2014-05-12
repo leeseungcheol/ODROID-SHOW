@@ -314,7 +314,7 @@ int parsechar(unsigned char current_char) {
                 else {
                         switch(current_char) {
                         case ';':        //Delimiter between row, col
-                                tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
+                                //tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
                                 //row = (tmpnum > right_edge0) ? right_edge0 : tmpnum;
                                 row = tmpnum;
                                 tmpnum = 0;
@@ -405,7 +405,7 @@ int parsechar(unsigned char current_char) {
                                 break;
 
                         case ',':
-                                tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
+                                //tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
                                 col = tmpnum;
                                 startImage.row = row;
                                 startImage.col = col;
@@ -414,19 +414,18 @@ int parsechar(unsigned char current_char) {
                                 return 0;
                                 
                         case 'i':
-                                tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
+                                //tmpnum = (tmpnum > 0) ? tmpnum - 1 : 0;
                                 col = tmpnum;
                                 endImage.row = row;
                                 endImage.col = col;
-                                imgsize = (endImage.row - startImage.row + 1)*(endImage.col - startImage.col + 1);    
+                                imgsize = (endImage.row - startImage.row)*(endImage.col - startImage.col);    
 
-                                tft.setAddrWindow(startImage.row, startImage.col, endImage.row, endImage.col);
+                                tft.setAddrWindow(startImage.row, startImage.col, endImage.row-1, endImage.col-1);
                                 tft.setdcbit();
                                 tft.clearcsbit();
                                 switchstate(IMGSHOW);
                                 Serial.println("cat the raw data image");
                                 return 0;
-                                
                         }
                         switchstate(NOTSPECIAL);
                         return 0;
