@@ -429,7 +429,7 @@ void Adafruit_GFX::setTextSize(uint8_t s) {
   textsize = (s > 0) ? s : 1;
 }
 
-int16_t getTextColor(void) {
+int16_t Adafruit_GFX::getTextColor(void) {
   return textcolor;
 }
 
