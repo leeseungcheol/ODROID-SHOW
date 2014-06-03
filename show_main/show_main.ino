@@ -14,9 +14,13 @@
  ****************************************************/
 
 #include <SPI.h>
+#include <Wire.h>
 #include <Adafruit_ILI9340.h>
 #include <Adafruit_GFX.h>
 #include <TimerOne.h>
+#include <Adafruit_BMP085.h>
+#include <ODROID_Si70xx.h>
+#include <ODROID_Si1132.h>
 
 // These are the pins used for the UNO
 // for Due/Mega/Leonardo use the hardware SPI pins (which are different)
@@ -81,6 +85,10 @@ uint8_t cntenable = 0;
 //Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _mosi, _sclk, _rst, _miso);
 // Use hardware SPI
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
+Adafruit_BMP085 bmp180;
+ODROID_Si70xx si7020;
+float UVindex = 0;
+ODROID_Si1132 si1132;
 
 void setup() {
         Serial.begin(500000);
@@ -109,13 +117,11 @@ void setup() {
         tft.print("Hello ODROID!");
         tft.setCursor(250, 200);
 
-
         tft.print(version);
 
         delay(1000);
         tft.fillScreen(backgroundColor);
         tft.setCursor(0, 0);
-
 }
 
 void timer1_setup() {
@@ -435,6 +441,41 @@ int parsechar(unsigned char current_char) {
                                 Serial.print("/");
                                 Serial.println(col);
                                 tft.drawPixel(row, col, foregroundColor);
+                                break;
+                        case 'w':        // Weather_Board
+                                bmp180.begin();
+                                switch (tmpnum) {
+                                case 0:
+                                        tft.print((bmp180.readTemperature()));
+                                        break;
+                                case 1:
+                                        tft.print(bmp180.readPressure());
+                                        break;
+                                case 2:
+                                        tft.print(bmp180.readAltitude());
+                                        break;
+                                case 3:
+                                        tft.print(si7020.readTemperature());
+                                        break;
+                                case 4:
+                                        tft.print(si7020.readHumidity());
+                                        break;
+                                case 5:
+                                        UVindex = si1132.readUV();
+                                        UVindex /= 100.0;
+                                        tft.print(UVindex);
+                                        break;
+                                case 6:
+                                        tft.print(si1132.readVisible());
+                                        break;
+                                case 7:
+                                        tft.print(si1132.readIR());
+                                        break;
+                                case 8:k:
+                                        break;
+                                case 9:
+                                        break;
+                                }
                                 break;
                         }
                         switchstate(NOTSPECIAL);
