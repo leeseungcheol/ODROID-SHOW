@@ -122,6 +122,9 @@ void setup() {
         delay(1000);
         tft.fillScreen(backgroundColor);
         tft.setCursor(0, 0);
+
+	si1132.begin();
+        bmp180.begin();
 }
 
 void timer1_setup() {
@@ -443,7 +446,6 @@ int parsechar(unsigned char current_char) {
                                 tft.drawPixel(row, col, foregroundColor);
                                 break;
                         case 'w':        // Weather_Board
-                                bmp180.begin();
                                 switch (tmpnum) {
                                 case 0:
                                         tft.print((bmp180.readTemperature()));
@@ -452,7 +454,7 @@ int parsechar(unsigned char current_char) {
                                         tft.print(bmp180.readPressure());
                                         break;
                                 case 2:
-                                        tft.print(bmp180.readAltitude());
+                                        tft.print(bmp180.readAltitude(101500));
                                         break;
                                 case 3:
                                         tft.print(si7020.readTemperature());
