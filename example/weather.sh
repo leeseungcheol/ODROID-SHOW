@@ -19,27 +19,27 @@ do
 		kill $subppid
 		exit
 	fi
-		echo -ne "\e[0;0f\e[32mBMP180\n\r" > $serialPort
+		echo -ne "\e[0;0f\e[32mBMP180  \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[35mTemp : \e[0w *C\n\r" > $serialPort
+		echo -ne "\e[35mTemp : \e[0w *C   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[35mPressure : \e[1w Pa\n\r" > $serialPort
+		echo -ne "\e[35mPressure : \e[1w Pa   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[35mAltitude : \e[2w meters\n\r" > $serialPort
+		echo -ne "\e[35mAltitude : \e[2w meters   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[32mSi7020\n\r" > $serialPort
+		echo -ne "\e[32mSi7020  \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[36mTemp : \e[3w *C\n\r" > $serialPort
+		echo -ne "\e[36mTemp : \e[3w *C   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[36mHumidity : \e[4w %\n\r" > $serialPort
+		echo -ne "\e[36mHumidity : \e[4w %   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[32mSi1132\n\r" > $serialPort
+		echo -ne "\e[32mSi1132  \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[37mUV : \e[5w\n\r" > $serialPort
+		echo -ne "\e[37mUV : \e[5w   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[37mVisible : \e[6w\n\r" > $serialPort
+		echo -ne "\e[37mVisible : \e[6w   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[37mIR : \e[7w\n\r" > $serialPort
+		echo -ne "\e[37mIR : \e[7w   \n\r" > $serialPort
 		sleep 0.1;
 done
 
