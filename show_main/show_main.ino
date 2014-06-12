@@ -449,31 +449,55 @@ int parsechar(unsigned char current_char) {
                                 switch (tmpnum) {
                                 case 0:
                                         tft.print((bmp180.readTemperature()));
+                                        Serial.print("w0");
+                                        Serial.print(bmp180.readTemperature());
+                                        Serial.print("\e");
                                         break;
                                 case 1:
                                         tft.print(bmp180.readPressure());
+                                        Serial.print("w1");
+                                        Serial.print(bmp180.readPressure());
+                                        Serial.print("\e");
                                         break;
                                 case 2:
                                         tft.print(bmp180.readAltitude(101500));
+                                        Serial.print("w2");
+                                        Serial.print(bmp180.readAltitude(101500));
+                                        Serial.print("\e");
                                         break;
                                 case 3:
                                         tft.print(si7020.readTemperature());
+                                        Serial.print("w3");
+                                        Serial.print(si7020.readTemperature());
+                                        Serial.print("\e");
                                         break;
                                 case 4:
                                         tft.print(si7020.readHumidity());
+                                        Serial.print("w4");
+                                        Serial.print(si7020.readHumidity());
+                                        Serial.print("\e");
                                         break;
                                 case 5:
                                         UVindex = si1132.readUV();
                                         UVindex /= 100.0;
                                         tft.print(UVindex);
+                                        Serial.print("w5");
+                                        Serial.print(UVindex);
+                                        Serial.print("\e");
                                         break;
                                 case 6:
                                         tft.print(si1132.readVisible());
+                                        Serial.print("w6");
+                                        Serial.print(si1132.readVisible());
+                                        Serial.print("\e");
                                         break;
                                 case 7:
                                         tft.print(si1132.readIR());
+                                        Serial.print("w7");
+                                        Serial.print(si1132.readIR());
+                                        Serial.print("\e");
                                         break;
-                                case 8:k:
+                                case 8:
                                         break;
                                 case 9:
                                         break;
@@ -513,7 +537,5 @@ uint16_t change_mColor(int opt) {
                 return ILI9340_WHITE;
         case 9:
                 return ILI9340_BLACK;
-        } 
+        }
 }
-
-
