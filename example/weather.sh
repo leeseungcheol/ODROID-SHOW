@@ -15,7 +15,7 @@ sleep 0.1
 while true
 do
 	if [ $flag -ne 0 ] ; then
-#		echo -ne "\ec\e[2s\e[1r" > $serialPort
+		echo -ne "\ec\e[2s\e[1r" > $serialPort
 		kill $subppid
 		exit
 	fi
@@ -31,15 +31,15 @@ do
 		sleep 0.1;
 		echo -ne "\e[36mTemp : \e[3w *C   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[36mHumidity : \e[4w %   \n\r" > $serialPort
+		echo -ne "\e[36mHumidity : \e[4w %   \n\n\r" > $serialPort
 		sleep 0.1;
 		echo -ne "\e[32mSi1132  \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[37mUV : \e[5w   \n\r" > $serialPort
+		echo -ne "\e[37mUV Index : \e[5w   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[37mVisible : \e[6w   \n\r" > $serialPort
+		echo -ne "\e[37mVisible : \e[6w lux   \n\r" > $serialPort
 		sleep 0.1;
-		echo -ne "\e[37mIR : \e[7w   \n\r" > $serialPort
+		echo -ne "\e[37mIR : \e[7w lux   \n\r" > $serialPort
 		sleep 0.1;
 done
 

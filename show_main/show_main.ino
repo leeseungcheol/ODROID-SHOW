@@ -58,6 +58,7 @@ cursor startImage, endImage;
 
 uint32_t x = 0;
 uint8_t c;
+uint8_t carr[64] = {0};
 
 uint8_t current_state = NOTSPECIAL;
 uint8_t previous_state = NOTSPECIAL;
@@ -496,10 +497,6 @@ int parsechar(unsigned char current_char) {
                                         Serial.print("w7");
                                         Serial.print(si1132.readIR());
                                         Serial.print("\e");
-                                        break;
-                                case 8:
-                                        break;
-                                case 9:
                                         break;
                                 }
                                 break;
