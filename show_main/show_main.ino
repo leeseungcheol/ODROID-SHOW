@@ -386,7 +386,7 @@ int parsechar(unsigned char current_char) {
                                         tft.setTextColor(foregroundColor, backgroundColor);
                                 } 
                                 else if (tmpnum/10 == 4) {
-                                        backgroundColor = change_mColor(tmpnum%30);
+                                        backgroundColor = change_mColor(tmpnum%40);
                                         tft.setTextColor(foregroundColor, backgroundColor);
                                 }
                                 break;
