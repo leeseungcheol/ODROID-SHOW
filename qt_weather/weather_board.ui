@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WeatherBoard</class>
+ <widget class="QWidget" name="WeatherBoard">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QLCDNumber" name="lcdNum_Temp">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>90</y>
+     <width>151</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="digitCount">
+    <number>6</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lTemperature">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>70</y>
+     <width>91</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Temperature</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lPressure">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>340</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Pressure</string>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNum_Pressure">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>360</y>
+     <width>151</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="digitCount">
+    <number>6</number>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNum_Altitude">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>270</y>
+     <width>151</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="digitCount">
+    <number>6</number>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNum_Humidity">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>180</y>
+     <width>151</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="digitCount">
+    <number>6</number>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNum_UV">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>450</y>
+     <width>151</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="digitCount">
+    <number>6</number>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNum_Visible">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>540</y>
+     <width>151</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="digitCount">
+    <number>6</number>
+   </property>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNum_IR">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>630</y>
+     <width>151</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="digitCount">
+    <number>6</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lAltitude">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>250</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Altitude</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lHumidity">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>160</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Humidity</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lUV">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>430</y>
+     <width>21</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>UV</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lVisible">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>520</y>
+     <width>51</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Visible</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lIR">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>610</y>
+     <width>16</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>IR</string>
+   </property>
+  </widget>
+  <widget class="QwtPlot" name="qwtPlotTempHumi">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>50</y>
+     <width>291</width>
+     <height>311</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QwtPlot" name="qwtPlotAltitude">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>50</y>
+     <width>261</width>
+     <height>311</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QwtPlot" name="qwtPlotPressure">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>420</y>
+     <width>291</width>
+     <height>311</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QwtPlot" name="qwtPlotUVAmbient">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>420</y>
+     <width>261</width>
+     <height>311</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lTemperature_2">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>130</y>
+     <width>91</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="text">
+    <string>Temperature</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lHumidity_2">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>190</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Humidity</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lAltitude_2">
+   <property name="geometry">
+    <rect>
+     <x>930</x>
+     <y>150</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Altitude</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lPressure_2">
+   <property name="geometry">
+    <rect>
+     <x>520</x>
+     <y>560</y>
+     <width>67</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Pressure</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lVisible_2">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>560</y>
+     <width>51</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Visible</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lUV_2">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>500</y>
+     <width>21</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>UV</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lIR_2">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>630</y>
+     <width>16</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>IR</string>
+   </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
