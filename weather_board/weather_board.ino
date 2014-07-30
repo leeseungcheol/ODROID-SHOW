@@ -1,11 +1,15 @@
+#include <Adafruit_BMP085_U.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP085.h>
+#include <ODROID_Si1132.h>
+#include <ODROID_Si70xx.h>
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_ILI9340.h>
 #include <Adafruit_GFX.h>
 #include <TimerOne.h>
 #include <Adafruit_BMP085.h>
-#include <ODROID_Si70xx.h>
-#include <ODROID_Si1132.h>
 
 // These are the pins used for the UNO
 // for Due/Mega/Leonardo use the hardware SPI pins (which are different)
@@ -26,16 +30,21 @@ uint32_t x = 0;
 const char version[] = "v1.0";
 
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
+Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085);
 Adafruit_BMP085 bmp180;
+
 ODROID_Si70xx si7020;
 ODROID_Si1132 si1132;
+
 float UVindex = 0;
 float bmp180Temperature = 0;
 uint32_t bmp180Pressure = 0;
 float bmp180Altitude = 0;
+
 float si7020Temperature = 0;
 float si7020Humidity = 0;
 float si1132UVIndex = 0;
+
 uint32_t si1132Visible = 0;
 uint32_t si1132IR = 0;
 
@@ -45,7 +54,9 @@ void setup() {
 
 	si1132.begin();
         bmp180.begin();
+        bmp.begin();
         tft.begin();
+        
         // initialize the digital pin as an output for LED Backlibht
         pinMode(ledPin, OUTPUT);
         analogWrite(ledPin, 200);
@@ -113,6 +124,9 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void loop(void) {
+  sensors_event_t event;
+  bmp.getEvent(&event);
+  
   tft.setCursor(0, 0);
   tft.setTextColor(ILI9340_GREEN, backgroundColor);
   tft.println("BMP180");
@@ -120,7 +134,8 @@ void loop(void) {
   tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
   tft.print("Temp : ");
   tft.setTextColor(ILI9340_CYAN, backgroundColor);
-  bmp180Temperature = bmp180.readTemperature();
+  //bmp180Temperature = bmp180.readTemperature();
+  bmp.getTemperature(&bmp180Temperature);
   tft.print(bmp180Temperature);
   tft.println(" *C   ");
   delay(50);
@@ -128,7 +143,8 @@ void loop(void) {
   tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
   tft.print("Pressure : ");
   tft.setTextColor(ILI9340_CYAN, backgroundColor);
-  bmp180Pressure = bmp180.readPressure();
+  //bmp180Pressure = bmp180.readPressure();
+  bmp180Pressure = event.pressure;
   tft.print(bmp180Pressure);
   tft.println(" Pa   ");
   delay(50);
@@ -136,7 +152,8 @@ void loop(void) {
   tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
   tft.print("Altitude : ");
   tft.setTextColor(ILI9340_CYAN, backgroundColor);
-  bmp180Altitude = bmp180.readAltitude();
+  //bmp180Altitude = bmp180.readAltitude(101500);
+  bmp180Altitude = bmp.pressureToAltitude(SENSORS_PRESSURE_SEALEVELHPA, event.pressure, bmp180Temperature);
   tft.print(bmp180Altitude);
   tft.println(" meters     ");
   delay(50);
