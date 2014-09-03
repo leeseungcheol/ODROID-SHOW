@@ -50,9 +50,22 @@ uint16_t ODROID_Si1132::readUV()
 	return read16(0x2c);
 }
 
-uint16_t ODROID_Si1132::readIR()
+float ODROID_Si1132::readIR()
 {
-	return read16(0x24);
+	float lx = 0;
+
+	for (int i = 0; i < 5; i++) {
+		lx += read16(0x24);
+		delay(50);
+	}
+	lx = lx/5;
+	// adc offset
+	if (lx > 256)
+		lx -= 256;
+	else
+		lx = 0;
+
+	return lx;
 }
 
 float ODROID_Si1132::readVisible()
@@ -63,7 +76,7 @@ float ODROID_Si1132::readVisible()
 		lx += read16(0x22);
 		delay(50);
 	}
-	lx = lx/10;
+	lx = lx/5;
 	// adc offset
 	if (lx > 256)
 		lx -= 256;

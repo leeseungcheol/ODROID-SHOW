@@ -89,7 +89,7 @@ class ODROID_Si1132 {
 		uint16_t readTemperature(void);
 		uint16_t readUV(void);
 		float readVisible(void);
-		uint16_t readIR(void);
+		float readIR(void);
 	private :
 		uint16_t read16(uint8_t addr);
 		uint8_t read8(uint8_t addr);
