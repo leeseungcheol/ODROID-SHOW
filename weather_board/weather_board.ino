@@ -25,7 +25,7 @@ uint8_t rotation = 1;
 uint16_t foregroundColor, backgroundColor;
 uint32_t x = 0;
 
-const char version[] = "v1.1";
+const char version[] = "v1.2";
 
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
 Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085);
