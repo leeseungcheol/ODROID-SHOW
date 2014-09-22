@@ -21,7 +21,7 @@ MIT license, all text above must be included in any redistribution
 #include <SPI.h>
 
 #define NOP __asm__ __volatile__ ("nop");
-#define WAIT NOP NOP NOP NOP NOP NOP NOP NOP NOP // 11 NOPs 
+#define WAIT NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP NOP // 11 NOPs 
 
 #if defined(__SAM3X8E__)
 #include <include/pio.h>
