@@ -17,10 +17,7 @@
 #include <Wire.h>
 #include <Adafruit_ILI9340.h>
 #include <Adafruit_GFX.h>
-#include <TimerOne.h>
-#include <Adafruit_BMP085.h>
-#include <ODROID_Si70xx.h>
-#include <ODROID_Si1132.h>
+#include "TimerOne.h"
 
 // These are the pins used for the UNO
 // for Due/Mega/Leonardo use the hardware SPI pins (which are different)
@@ -77,84 +74,48 @@ uint32_t imgsize = 0;
 uint32_t sizecnt = 0;
 
 uint8_t ledPin = 5; // PWM LED Backlight control to digital pin 5
-
 uint8_t rgb565hi, rgb565lo;
-
 uint8_t cntenable = 0;
 
 // Using software SPI is really not suggested, its incredibly slow
 //Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _mosi, _sclk, _rst, _miso);
 // Use hardware SPI
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
-Adafruit_BMP085 bmp180;
-ODROID_Si70xx si7020;
-float UVindex = 0;
-ODROID_Si1132 si1132;
 
-void setup() {
+void setup()
+{
         Serial.begin(500000);
-        Serial.println("Welcome to the odroid_show");
+        Serial.println("Welcome to the ODROID-SHOW");
 
         tft.begin();
         // initialize the digital pin as an output for LED Backlibht
         pinMode(ledPin, OUTPUT);
         analogWrite(ledPin, 200);
 
-        timer1_setup();
         delay(1500);
 
-        if (analogRead(3) > 450 && analogRead(3) < 550)
-                testFillScreen();
-
-        backgroundColor = ILI9340_BLACK;
-        tft.fillScreen(backgroundColor);
-        foregroundColor = ILI9340_YELLOW;
-        tft.setTextColor(foregroundColor, backgroundColor);
-        tft.setTextSize(textSize);
-        tft.setCursor(0, 0);
         tft.setRotation(rotation);
-
+        tft.setTextSize(textSize);
         tft.setCursor(50, 50);
-        tft.print("Hello ODROID!");
+        tft.print("Hello ODROID-SHOW!");
         tft.setCursor(250, 200);
-
         tft.print(version);
 
         delay(1000);
         tft.fillScreen(backgroundColor);
         tft.setCursor(0, 0);
-
-	si1132.begin();
-        bmp180.begin();
+        
+        Timer1.initialize(1000000);
+        Timer1.attachInterrupt(timerCallback);
 }
 
-void timer1_setup() {
-        cli();
-        TCCR1A = 0;
-        TCCR1B = 0;
-        OCR1A = (16000000 / 1024) -1;
-        TCCR1B |= (1 << WGM12);
-        TCCR1B |= (1 << CS12) | (1 << CS10);
-        TIMSK1 |= (1 << OCIE1A);
-        sei();
-}
-
-unsigned long testFillScreen() {
-        unsigned long start = micros();
-        tft.fillScreen(ILI9340_RED);
-        delay(1000); 
-        tft.fillScreen(ILI9340_GREEN);
-        delay(1000);
-        tft.fillScreen(ILI9340_BLUE);
-        delay(1000);
-        return micros() - start;   
-}
-
-ISR(TIMER1_COMPA_vect) {
+void timerCallback()
+{
         x++;
 }
 
-void loop(void) {
+void loop(void)
+{
         if (current_state == IMGSHOW) {
                 if (Serial.available() > 1) {
                         rgb565lo = Serial.read();
@@ -187,13 +148,15 @@ void loop(void) {
         }
 }
 
-void switchstate(int newstate) {
+void switchstate(int newstate)
+{
         previous_state = current_state;
         current_state = newstate;
 
 }
 
-void cursorDown() {
+void cursorDown()
+{
         if (tft.cursor_y < bottom_edge0) {
                 tft.cursor_y += textSize*8;
                 tft.setCursor(tft.cursor_x, tft.cursor_y);
@@ -201,7 +164,8 @@ void cursorDown() {
 
 }
 
-int parsechar(unsigned char current_char) {
+int parsechar(unsigned char current_char)
+{
         switch(current_state) {
         case NOTSPECIAL:
                 if (current_char == 033) {        // Escape
@@ -460,7 +424,8 @@ int parsechar(unsigned char current_char) {
         }
 }
 
-uint16_t change_mColor(int opt) {
+uint16_t change_mColor(int opt)
+{
         switch (opt) {
         case 0:
                 return ILI9340_BLACK;
