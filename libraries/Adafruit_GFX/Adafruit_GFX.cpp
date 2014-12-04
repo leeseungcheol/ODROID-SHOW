@@ -425,6 +425,11 @@ void Adafruit_GFX::setCursor(int16_t x, int16_t y) {
   cursor_y = y;
 }
 
+void Adafruit_GFX::setCharCursor(int16_t x, int16_t y) {
+  cursor_x = x * 6 * textsize;
+  cursor_y = y * 8 * textsize;
+}
+
 void Adafruit_GFX::setTextSize(uint8_t s) {
   textsize = (s > 0) ? s : 1;
 }

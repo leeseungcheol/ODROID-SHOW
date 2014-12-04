@@ -41,7 +41,7 @@
 
 #define DEBUG
 
-const char version[] = "v1.4";
+const char version[] = "v1.5";
 
 typedef struct cursor {
         uint32_t row;
@@ -66,6 +66,7 @@ uint16_t num, row, col;
 uint16_t bottom_edge0 = BOTTOM_EDGE240;
 uint16_t right_edge0  = RIGHT_EDGE320;
 
+uint8_t pwm = 255;
 uint8_t textSize = 2;
 uint8_t rotation = 1;
 uint16_t foregroundColor, backgroundColor;
@@ -89,10 +90,7 @@ void setup()
 
         tft.begin();
         // initialize the digital pin as an output for LED Backlibht
-        pinMode(ledPin, OUTPUT);
-        analogWrite(ledPin, 200);
-
-        delay(1500);
+        initPins();
 
         tft.setRotation(rotation);
         tft.setTextSize(textSize);
@@ -105,13 +103,92 @@ void setup()
         tft.fillScreen(backgroundColor);
         tft.setCursor(0, 0);
         
-        Timer1.initialize(1000000);
+        Timer1.initialize(200000);
         Timer1.attachInterrupt(timerCallback);
+}
+void initPins()
+{
+	pinMode(ledPin, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(4, OUTPUT);
+	pinMode(6, OUTPUT);
+	pinMode(7, INPUT);
+	pinMode(A0, INPUT);
+	pinMode(A1, INPUT);
+
+	analogWrite(ledPin, pwm);
 }
 
 void timerCallback()
 {
         x++;
+        readBtn();
+}
+
+unsigned char btn0Presses = 0;
+unsigned char btn0Releases = 0;
+unsigned char btn1Presses = 0;
+unsigned char btn1Releases = 0;
+unsigned char btn2Presses = 0;
+unsigned char btn2Releases = 0;
+
+unsigned char btn0Pushed = 0;
+unsigned char btn1Pushed = 0;
+unsigned char btn2Pushed = 0;
+
+void readBtn()
+{
+        if (!digitalRead(A1) && (btn2Presses == 0)) {
+                btn2Presses = 1;
+                btn2Releases = 0;
+                btn2Pushed = 1;
+                digitalWrite(6, LOW);
+        }
+
+        if (digitalRead(A1) && (btn2Releases == 0)) {
+                btn2Releases = 1;
+                btn2Presses = 0;
+                btn2Pushed = 0;
+                digitalWrite(6, HIGH);
+        }
+
+        if (!digitalRead(7) && (btn0Presses == 0)) {
+                btn0Presses = 1;
+                btn0Releases = 0;
+                btn0Pushed = 1;
+                if (pwm > 225)
+                        pwm = 255;
+                else
+                        pwm += 30;
+                analogWrite(ledPin, pwm);
+                digitalWrite(3, LOW);
+        }
+
+        if (digitalRead(7) && (btn0Releases == 0)) {
+                btn0Releases = 1;
+                btn0Presses = 0;
+                btn0Pushed = 0;
+                digitalWrite(3, HIGH);
+        }
+
+        if (!digitalRead(A0) && (btn1Presses == 0)) {
+                btn1Presses = 1;
+                btn1Releases = 0;
+                btn1Pushed = 1;
+                if (pwm < 30)
+                        pwm = 0;
+                else
+                        pwm -= 30;
+                analogWrite(ledPin, pwm);
+                digitalWrite(4, LOW);
+        }
+
+        if (digitalRead(A0) && (btn1Releases == 0)) {
+                btn1Releases = 1;
+                btn1Presses = 0;
+                btn1Pushed = 0;
+                digitalWrite(4, HIGH);
+        }
 }
 
 void loop(void)
@@ -127,7 +204,7 @@ void loop(void)
                         x = 0;
                 }
                 else if (cntenable == 1) {
-                        if ((sizecnt == imgsize) || (x > 2)) {
+                        if ((sizecnt == imgsize) || (x > 10)) {
                                 cntenable = 0;
                                 sizecnt = 0;
                                 Serial.print(sizecnt);
