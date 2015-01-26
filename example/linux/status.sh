@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This scrpit is compatible with x86 desktopp.
+# This scrpit is compatible with x86 desktopp.
+# This scrpit is compatible with x86 desktopp.
+
 flag=0
 serialPort="/dev/ttyUSB0"
 
