@@ -5,6 +5,7 @@ serialPort="/dev/ttyUSB0"
 
 trap "flag=1" SIGINT SIGKILL SIGTERM
 
+gcc -o port_open port_open.c
 ./port_open &
 subppid=$!
 
@@ -60,11 +61,10 @@ do
 		echo -ne "\r\e[35m" > $serialPort
 		sleep 0.1
 		df -h | grep "sda" | awk '{print ""$1"\n\rSize  : "$2"\n\rUsed  : "$3"\n\rAvail : "$4"\n\rUse   : "$5""}' > $serialPort
-		echo -ne "$sdaInfo" > $serialPort
 		sleep 0.1
 		cpu_state
 		sleep 0.1
-		echo -ne "\r" > $serialPort
+		echo -ne "\n\r" > $serialPort
 		echo -ne "\e[33mCPU Freq: \e[37m"$cpuFreqM"MHz   \eE" > $serialPort
 		echo -ne "\e[33mCPU Temp: \e[37m$cpuTempM\e   " > $serialPort
 		sleep 0.1
