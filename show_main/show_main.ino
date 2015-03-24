@@ -257,6 +257,10 @@ int parsechar(unsigned char current_char)
                         cursorDown();
                         return 0;
                 } 
+		else if (current_char == 006) {		// ACK
+			Serial.write(6);
+			return 0;
+		}
                 else {
                         switchstate(NOTSPECIAL);
                         return (current_char);

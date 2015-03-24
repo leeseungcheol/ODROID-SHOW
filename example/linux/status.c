@@ -23,6 +23,9 @@ static const char mountPath[] = "/";
 
 static const int GB = 1024*1024*1024; // Giga byte
 static char buffer[256];
+static char serialBuffer[64];
+
+void writeData(int fd, char *str);
 
 struct CPUData_ {
 	unsigned long long int totalTime;
@@ -78,24 +81,17 @@ void diskSpace(int usbdev)
 	}
 
 	sprintf(buffer, "\e[37mMount Path : \e[36m%s\n\r", mountPath);
-	usleep(100000);
-	write(usbdev, buffer, strlen(buffer) + 1);
+	writeData(usbdev, buffer);
 
 	sprintf(buffer, "\e[33mdisk_size : \e[32m%.2lfGB\n\r",
 						(double)diskData.disk_size/GB);
-	write(usbdev, buffer, strlen(buffer) + 1);
-	usleep(100000);
-
+	writeData(usbdev, buffer);
 	sprintf(buffer, "\e[35mused : \e[32m%.2lfGB\n\r",
 						(double)diskData.used/GB);
-	write(usbdev, buffer, strlen(buffer) + 1);
-	usleep(100000);
-
+	writeData(usbdev, buffer);
 	sprintf(buffer, "\e[36mfree : \e[32m%.2lfGB",
 						(double)diskData.free/GB);
-	write(usbdev, buffer, strlen(buffer) + 1);
-	usleep(100000);
-
+	writeData(usbdev, buffer);
 }
 
 void systemInfo(int fd)
@@ -105,16 +101,14 @@ void systemInfo(int fd)
 
 	time(&t);
 	sprintf(buffer, "\e[35m%s\r", ctime(&t));
-	write(fd, buffer, strlen(buffer) + 1);
-	usleep(300000);
+	writeData(fd, buffer);
 	uname(&uts);
 	sprintf(buffer, "\e[37mOSname:\e[36m%s\n\r", uts.sysname);
-	write(fd, buffer, strlen(buffer) + 1);
+	writeData(fd, buffer);
 	sprintf(buffer, "\e[37mVersion:\e[36m%s\n\r", uts.release);
-	write(fd, buffer, strlen(buffer) + 1);
-	usleep(300000);
+	writeData(fd, buffer);
 	sprintf(buffer, "\e[37mMachine:\e[36m%s\n\r", uts.machine);
-	write(fd, buffer, strlen(buffer) + 1);
+	writeData(fd, buffer);
 }
 
 int cpuCount(int cpus)
@@ -164,7 +158,6 @@ void cpuUsageDisplay(int usbdev, struct CPUData_ *cpuData, int cpus)
 
 	for (i = 0; i < cpus; i++) {
 		fgets(buffer, 255, file);
-		usleep(100000);
 		if (i == 0) {
 			sscanf(buffer, "cpu %llu %llu %llu %llu %llu %llu %llu %llu %llu",
 					&usertime, &nicetime, &systemtime, &idletime,
@@ -196,15 +189,28 @@ void cpuUsageDisplay(int usbdev, struct CPUData_ *cpuData, int cpus)
 		if ((i != 0) && (i%2 == 1)) {	
 			sprintf(buffer, "\e[33mcpu%d :\e[32m%4.1f%% ",
 					i, cpuData[i].userPeriod/total*100.0);
-			write(usbdev, buffer, strlen(buffer) + 1);
+			writeData(usbdev, buffer);
 		} else if ((i != 0) && (i%2 == 0)) {
 			sprintf(buffer, "\e[33mcpu%d :\e[32m%4.1f%%  \n\r",
 					i, cpuData[i].userPeriod/total*100.0);
-			write(usbdev, buffer, strlen(buffer) + 1);
+			writeData(usbdev, buffer);
 		}
 	}
 
 	fclose(file);
+}
+
+void writeData(int fd, char *str)
+{
+	strcat(serialBuffer, str);
+        if ((sizeof(serialBuffer) - strlen(serialBuffer)) < strlen(str)) {
+                write(fd, serialBuffer, strlen(serialBuffer) + 1);
+                write(fd, "\006", 1);
+                while (serialBuffer[0] != 6) {
+                        read(fd, serialBuffer, 1);
+                }
+                memset(serialBuffer, 0, sizeof(serialBuffer));
+        }
 }
 
 int main(void)
@@ -215,18 +221,13 @@ int main(void)
 
 	usbdev = serialSetup();
 
-	sprintf(buffer, "\ec\e[2s\e[1r");
-	write(usbdev, buffer, strlen(buffer) + 1);
-	usleep(100000);
+	write(usbdev, "\ec\e[2s\e[1r");
 	cpus = cpuCount(cpus);
 	cpuData =  cpuUsageInit(cpuData, cpus);
 
 	while (1) {
-		sprintf(buffer, "\e[H");
-		write(usbdev, buffer, strlen(buffer) + 1);
+		writeData(usbdev, "\e[H");
 		systemInfo(usbdev);
-		usleep(100000);
-
 		cpuUsageDisplay(usbdev, cpuData, cpus);
 		diskSpace(usbdev);
 	}
