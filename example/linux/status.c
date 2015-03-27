@@ -187,11 +187,11 @@ void cpuUsageDisplay(int usbdev, struct CPUData_ *cpuData, int cpus)
 		total = (double)cpuData[i].totalPeriod;
 
 		if ((i != 0) && (i%2 == 1)) {	
-			sprintf(buffer, "\e[33mcpu%d :\e[32m%4.1f%% ",
+			sprintf(buffer, "\e[33mcpu%d:\e[32m%4.1f%% ",
 					i, cpuData[i].userPeriod/total*100.0);
 			writeData(usbdev, buffer);
 		} else if ((i != 0) && (i%2 == 0)) {
-			sprintf(buffer, "\e[33mcpu%d :\e[32m%4.1f%%  \n\r",
+			sprintf(buffer, "\e[33mcpu%d:\e[32m%4.1f%%  \n\r",
 					i, cpuData[i].userPeriod/total*100.0);
 			writeData(usbdev, buffer);
 		}
@@ -202,15 +202,13 @@ void cpuUsageDisplay(int usbdev, struct CPUData_ *cpuData, int cpus)
 
 void writeData(int fd, char *str)
 {
-	strcat(serialBuffer, str);
-        if ((sizeof(serialBuffer) - strlen(serialBuffer)) < strlen(str)) {
-                write(fd, serialBuffer, strlen(serialBuffer) + 1);
-                write(fd, "\006", 1);
-                while (serialBuffer[0] != 6) {
-                        read(fd, serialBuffer, 1);
-                }
-                memset(serialBuffer, 0, sizeof(serialBuffer));
-        }
+	write(fd, str, strlen(str) + 1);
+	write(fd, "\006", 1);
+	while (serialBuffer[0] != 6) {
+		read(fd, serialBuffer, 1);
+		usleep(10000);
+	}
+	memset(serialBuffer, 0, sizeof(serialBuffer));
 }
 
 int main(void)
@@ -221,7 +219,7 @@ int main(void)
 
 	usbdev = serialSetup();
 
-	write(usbdev, "\ec\e[2s\e[1r");
+	writeData(usbdev, "\ec\e[2s\e[1r");
 	cpus = cpuCount(cpus);
 	cpuData =  cpuUsageInit(cpuData, cpus);
 
