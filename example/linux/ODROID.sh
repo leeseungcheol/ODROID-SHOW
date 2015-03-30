@@ -6,7 +6,7 @@ serialPort="/dev/ttyUSB0"
 trap "flag=1" SIGINT SIGKILL SIGTERM
 
 gcc -o port_open port_open.c
-./port_open &
+./port_open $serialPort &
 subppid=$!
 
 DATA[0]="ODROID"

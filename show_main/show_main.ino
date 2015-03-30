@@ -41,7 +41,7 @@
 
 #define DEBUG
 
-const char version[] = "v1.5";
+const char version[] = "v1.6";
 
 typedef struct cursor {
         uint32_t row;

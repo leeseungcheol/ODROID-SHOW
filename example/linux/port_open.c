@@ -5,12 +5,19 @@
 
 #define baudrate	B500000
 
-const char serialPort[] = "/dev/ttyUSB0";
+static char serialPort[] = "/dev/ttyUSB0";
 
-int main(void)
+int main(int argc, char **argv)
 {
 	int usbdev;
 	struct termios options;
+
+	if (argc == 2) {
+		sprintf(serialPort, "%s", argv[1]);
+	} else if (argc > 2) {
+		printf("Too many arguments\n");
+		return 0;
+	}
 
 	usbdev = open(serialPort, O_RDWR | O_NOCTTY | O_NDELAY);
 
