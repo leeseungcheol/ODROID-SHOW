@@ -146,6 +146,8 @@ void serialEvent() {
 			} else if ((ch = Serial.read()) == 006) {
 				ackFlag = 1;
 				strcnt = 0;
+			} else {
+				bufferWrite(ch);
 			}
 		}
 	}
