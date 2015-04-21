@@ -39,9 +39,19 @@
 #define TOP_EDGE0              0
 #define BOTTOM_EDGE240         239
 
-#define DEBUG
+#define SERIAL_RX_BUFFER_SIZE 64
 
-const char version[] = "v1.6";
+volatile uint8_t _rx_buffer_head = 0;
+volatile uint8_t _rx_buffer_tail = 0;
+uint8_t _rx_buffer[SERIAL_RX_BUFFER_SIZE];
+uint8_t length = 0;
+uint8_t lengthFlag = 0;
+uint8_t ackFlag = 0;
+uint8_t readFlag = 0;
+uint8_t strcnt = 0;
+
+
+const char version[] = "v2.0";
 
 typedef struct cursor {
         uint32_t row;
@@ -53,9 +63,10 @@ cursor cursor_sav = {
         0, 0 };
 cursor startImage, endImage;
 
-uint32_t x = 0;
+uint32_t imgDelay = 0;
+uint32_t serialDelay = 0;
 uint8_t c;
-uint8_t carr[64] = {0};
+uint8_t ch;
 
 uint8_t current_state = NOTSPECIAL;
 uint8_t previous_state = NOTSPECIAL;
@@ -103,7 +114,7 @@ void setup()
         tft.fillScreen(backgroundColor);
         tft.setCursor(0, 0);
         
-        Timer1.initialize(200000);
+        Timer1.initialize(20000);
         Timer1.attachInterrupt(timerCallback);
 }
 void initPins()
@@ -119,10 +130,45 @@ void initPins()
 	analogWrite(ledPin, pwm);
 }
 
+void serialEvent() {
+	if (current_state != IMGSHOW) {
+		while (Serial.available()) {
+			serialDelay = 0;
+			if (readFlag) {
+				bufferWrite(Serial.read());
+				strcnt++;
+				if (strcnt == length)
+					readFlag = 0;
+			} else if (ackFlag) {
+				length = Serial.read() - 48;
+				lengthFlag = 1;
+				ackFlag = 0;
+			} else if ((ch = Serial.read()) == 006) {
+				ackFlag = 1;
+				strcnt = 0;
+			}
+		}
+	}
+}
+
 void timerCallback()
 {
-        x++;
+        imgDelay++;
+	serialDelay++;
         readBtn();
+
+	if (serialDelay > 20) {
+		lengthFlag = 0;
+		readFlag = 0;
+		ackFlag = 0;
+	}
+	if (lengthFlag) {
+		if (getBufferSize() > (length + 2)) {
+			readFlag = 1;
+			Serial.print(6);
+			lengthFlag = 0;
+		}
+	}
 }
 
 unsigned char btn0Presses = 0;
@@ -201,28 +247,51 @@ void loop(void)
                         tft.spiwrite(rgb565lo);
                         cntenable = 1;
                         sizecnt++;
-                        x = 0;
+                        imgDelay = 0;
                 }
                 else if (cntenable == 1) {
-                        if ((sizecnt == imgsize) || (x > 10)) {
+                        if ((sizecnt == imgsize) || (imgDelay > 100)) {
                                 cntenable = 0;
                                 sizecnt = 0;
-                                Serial.print(sizecnt);
                                 tft.setcsbit();
                                 switchstate(NOTSPECIAL);
-                                Serial.print("NOTSPECIAL Sart");
                         }
                 }
         }
         else {
-                if (Serial.available()) {
-                        if ((c = Serial.read()) > 0) {
-                                if (parsechar(c) > 0)
-                                        tft.print((char)c);
-
-                        }
+                if (!(_rx_buffer_head == _rx_buffer_tail)) {
+                        c = bufferRead();
+			if (parsechar(c) > 0)
+                        	tft.print((char)c);
                 }
         }
+}
+
+uint8_t getReadAvailable(void)
+{
+	if (_rx_buffer_head >= _rx_buffer_tail)
+		return _rx_buffer_head - _rx_buffer_tail;
+	return SERIAL_RX_BUFFER_SIZE - _rx_buffer_tail + _rx_buffer_head;
+}
+
+uint8_t getBufferSize(void)
+{
+	if (_rx_buffer_head >= _rx_buffer_tail)
+		return SERIAL_RX_BUFFER_SIZE - _rx_buffer_head + _rx_buffer_tail;
+	return _rx_buffer_tail - _rx_buffer_head;
+}
+
+uint8_t bufferRead(void)
+{
+	uint8_t c = _rx_buffer[_rx_buffer_tail];
+	_rx_buffer_tail = (_rx_buffer_tail + 1) % SERIAL_RX_BUFFER_SIZE;
+	return c;
+}
+
+void bufferWrite(uint8_t c)
+{
+	_rx_buffer[_rx_buffer_head] = c;
+	_rx_buffer_head = (_rx_buffer_head + 1) % SERIAL_RX_BUFFER_SIZE;
 }
 
 void switchstate(int newstate)

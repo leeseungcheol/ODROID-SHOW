@@ -18,12 +18,13 @@
 
 
 static const char procstat[] = "/proc/stat";
-static const char serialPort[] = "/dev/ttyUSB0";
+static char serialPort[] = "/dev/ttyUSB0";
 static const char mountPath[] = "/";
 
 static const int GB = 1024*1024*1024; // Giga byte
-static char buffer[256];
-static char serialBuffer[64];
+static char buffer[64];
+char isbusy = 0;
+int length = 0;
 
 void writeData(int fd, char *str);
 
@@ -202,20 +203,26 @@ void cpuUsageDisplay(int usbdev, struct CPUData_ *cpuData, int cpus)
 
 void writeData(int fd, char *str)
 {
-	write(fd, str, strlen(str) + 1);
 	write(fd, "\006", 1);
-	while (serialBuffer[0] != 6) {
-		read(fd, serialBuffer, 1);
+	length = strlen(str) + 48;
+	write(fd, &length, 1);
+	while (isbusy != '6') {
+		read(fd, &isbusy, 1);
 		usleep(10000);
 	}
-	memset(serialBuffer, 0, sizeof(serialBuffer));
+	write(fd, str, length - 48);
+	isbusy = 0;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
 	struct CPUData_ *cpuData;
 	int usbdev;
 	int cpus = -1;
+
+	if (argc == 2) {
+		sprintf(serialPort, "%s", argv[1]);
+	}
 
 	usbdev = serialSetup();
 
