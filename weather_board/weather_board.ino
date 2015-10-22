@@ -25,7 +25,10 @@ uint8_t textSize = 2;
 uint8_t rotation = 1;
 
 float battery = 0;
-uint8_t batState = 0;
+float oldBattery;
+uint8_t batteryCnt;
+uint8_t batteryState;
+uint8_t timer;
 
 uint16_t foregroundColor, backgroundColor;
 
@@ -124,6 +127,7 @@ void initPins()
 void timerCallback()
 {
 	readBtn();
+	timer++;
 }
 
 unsigned char btn0Presses = 0;
@@ -302,48 +306,51 @@ void displaySi1132()
 void batteryCheck()
 {
         battery = analogRead(A2)*1.094/1024/3.9*15.9;
+
+        if (abs(oldBattery - battery) > 0.5 || battery < 2.1)
+                batteryCnt++;
+        oldBattery = battery;
+
+        if (timer > 10) {
+                if (batteryCnt > 2) {
+                        timer = 0;
+                        batteryCnt = 0;
+                        batteryState = 1;
+                } else {
+                        batteryState = 0;
+                }
+        }
+
+        if (batteryState)
+                battery = 0;
+
         tft.setCharCursor(21, 3);
         tft.print(battery);
-        if (battery >= 3.95) {
-                if (batState != 4) {
-                        batState = 4;
+        if (battery > 3.95) {
                         tft.fillRect(244, 13, 14, 24, 10000);
                         tft.fillRect(260, 13, 14, 24, 10000);
                         tft.fillRect(276, 13, 14, 24, 10000);
                         tft.fillRect(292, 13, 14, 24, 10000);
-                }
         } else if (battery > 3.75 && battery <= 3.95) {
-                if (batState != 3) {
-                        batState = 3;
                         tft.fillRect(244, 13, 14, 24, 10000);
                         tft.fillRect(260, 13, 14, 24, 10000);
                         tft.fillRect(276, 13, 14, 24, 10000);
                         tft.fillRect(292, 13, 14, 24, 0);
-                }
         } else if (battery > 3.65 && battery <= 3.75) {
-                if (batState != 2) {
-                        batState = 2;
                         tft.fillRect(244, 13, 14, 24, 10000);
                         tft.fillRect(260, 13, 14, 24, 10000);
                         tft.fillRect(276, 13, 14, 24, 0);
                         tft.fillRect(292, 13, 14, 24, 0);
-                }
         } else if (battery > 3.5 && battery <= 3.65) {
-                if (batState != 1) {
-                        batState = 1;
                         tft.fillRect(244, 13, 14, 24, 10000);
                         tft.fillRect(260, 13, 14, 24, 0);
                         tft.fillRect(276, 13, 14, 24, 0);
                         tft.fillRect(292, 13, 14, 24, 0);
-                }
         } else if (battery <= 3.5) {
-                if (batState != 0) {
-                        batState = 0;
                         tft.fillRect(244, 13, 14, 24, 0);
                         tft.fillRect(260, 13, 14, 24, 0);
                         tft.fillRect(276, 13, 14, 24, 0);
                         tft.fillRect(292, 13, 14, 24, 0);
-                }
         }
 }
 
@@ -357,6 +364,5 @@ void loop(void)
         displaySi1132();        
 	sendToHost();
 
-        //If you want to use checking battery, remove the annotation
-	//batteryCheck();
+	batteryCheck();
 }
