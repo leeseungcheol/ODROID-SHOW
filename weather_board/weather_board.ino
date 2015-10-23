@@ -7,6 +7,7 @@
 #include <Adafruit_ILI9340.h>
 #include <Adafruit_BMP085_U.h>
 #include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 
 // These are the pins used for the UNO
 // for Due/Mega/Leonardo use the hardware SPI pins (which are different)
@@ -17,7 +18,7 @@
 #define _dc 9
 #define _rst 8
 
-const char version[] = "v1.3";
+const char version[] = "v1.4";
 
 uint8_t ledPin = 5;
 uint8_t pwm = 255;
@@ -29,17 +30,26 @@ float oldBattery;
 uint8_t batteryCnt;
 uint8_t batteryState;
 uint8_t timer;
+uint8_t count;
 
 uint16_t foregroundColor, backgroundColor;
 
+#define SEALEVELPRESSURE_HPA        (1024.25)
+
 Adafruit_ILI9340 tft = Adafruit_ILI9340(_cs, _dc, _rst);
-Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085);
+Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(SEALEVELPRESSURE_HPA);
+Adafruit_BME280 bme; // I2C
 ODROID_Si70xx si7020;
 ODROID_Si1132 si1132;
 
 float BMP180Temperature = 0;
 float BMP180Pressure = 0;
 float BMP180Altitude = 0;
+
+float BME280Temperature = 0;
+float BME280Pressure = 0;
+float BME280Humidity = 0;
+float BME280Altitude = 0;
 
 float Si7020Temperature = 0;
 float Si7020Humidity = 0;
@@ -48,18 +58,30 @@ float Si1132UVIndex = 0;
 uint32_t Si1132Visible = 0;
 uint32_t Si1132IR = 0;
 
+uint8_t WB_VERSION = 2;
+unsigned char errorState;
+
 void setup()
 {
         Serial.begin(500000);
         Serial.println("Welcome to the WEATHER-BOARD");
 
         // initialize the sensors
-        si1132.begin();
-        bmp.begin();
         tft.begin();
+        si1132.begin();
         
-        sensor_t sensor;
-        bmp.getSensor(&sensor);
+        // Check board version
+        if (read8(BME280_ADDRESS, BME280_REGISTER_CHIPID) != 0x60)
+                WB_VERSION = 1;
+
+        if (WB_VERSION == 1) {
+                bmp.begin();
+                sensor_t sensor;
+                bmp.getSensor(&sensor);
+        } else {
+                if(!bme.begin()) {
+                }
+        }
 
         // initialize the digital pins
 	initPins();
@@ -67,7 +89,7 @@ void setup()
 	analogReference(INTERNAL);
 
         //Timer one setting
-        Timer1.initialize(200000);
+        Timer1.initialize(300000);
         Timer1.attachInterrupt(timerCallback);
 
         tft.setRotation(rotation);
@@ -82,33 +104,54 @@ void setup()
 	displayLabel();
 }
 
+uint8_t read8(byte _i2caddr, byte reg)
+{
+	byte value;
+	Wire.beginTransmission((uint8_t)_i2caddr);
+	Wire.write((uint8_t)reg);
+	Wire.endTransmission();
+	Wire.requestFrom((uint8_t)_i2caddr, (byte)1);
+	value = Wire.read();
+	Wire.endTransmission();
+	return value;
+}
+
 void displayLabel()
 {
-        tft.setCharCursor(0, 1);
-        tft.setTextColor(ILI9340_GREEN, backgroundColor);
-        tft.println("Si7020");
-        tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
-        tft.println("Temp : ");
-        tft.println("Humidity :");
-        tft.setCharCursor(0, 5);
-        tft.setTextColor(ILI9340_GREEN, backgroundColor);
-        tft.println("Si1132");
-        tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
-        tft.println("UV Index : ");
-        tft.println("Visible :");
-        tft.println("IR :");
-        tft.setCharCursor(0, 10);
-        tft.setTextColor(ILI9340_GREEN, backgroundColor);
-        tft.println("BMP180");
-        tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
-        tft.println("Temp : ");
-        tft.println("Pressure :");
-        tft.println("Altitude :");
-        tft.drawRect(240, 10, 70, 30, 870);
-	tft.fillRect(244, 13, 14, 24, 10000);
-	tft.fillRect(260, 13, 14, 24, 10000);
-	tft.fillRect(276, 13, 14, 24, 10000);
-	tft.fillRect(292, 13, 14, 24, 10000);
+	tft.setCharCursor(0, 1);
+	tft.setTextColor(ILI9340_GREEN, backgroundColor);
+	tft.println("Si1132");
+	tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
+	tft.println("UV Index : ");
+	tft.println("Visible :");
+	tft.println("IR :");
+
+	if (WB_VERSION == 1) {
+		tft.setCharCursor(0, 6);
+		tft.setTextColor(ILI9340_GREEN, backgroundColor);
+		tft.println("Si7020");
+		tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
+		tft.println("Temp : ");
+		tft.println("Humidity :");
+		tft.setCharCursor(0, 10);
+		tft.setTextColor(ILI9340_GREEN, backgroundColor);
+		tft.println("BMP180");
+		tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
+		tft.println("Temp : ");
+		tft.println("Pressure :");
+		tft.println("Altitude :");
+	} else {
+		tft.setCharCursor(0, 6);
+		tft.setTextColor(ILI9340_GREEN, backgroundColor);
+		tft.setTextColor(ILI9340_GREEN, backgroundColor);
+		tft.println("BME280");
+		tft.setTextColor(ILI9340_MAGENTA, backgroundColor);
+		tft.println("Temp : ");
+		tft.println("Pressure :");
+		tft.println("Humidity :");
+		tft.println("Altitude :");
+	}
+	tft.drawRect(240, 10, 70, 30, 870);
 }
 
 void initPins()
@@ -120,6 +163,7 @@ void initPins()
 	pinMode(7, INPUT);
 	pinMode(A0, INPUT);
 	pinMode(A1, INPUT);
+        pinMode(A2, INPUT);
 
 	analogWrite(ledPin, pwm);
 }
@@ -198,24 +242,34 @@ void readBtn()
 
 void sendToHost()
 {
-        Serial.print("w0");
-        Serial.print(BMP180Temperature);
-        Serial.print("\ew1");
-        Serial.print(BMP180Pressure);
-        Serial.print("\ew2");
-        Serial.print(BMP180Altitude);
-        Serial.print("\ew3");
-        Serial.print(Si7020Temperature);
-        Serial.print("\ew4");
-        Serial.print(Si7020Humidity);
-        Serial.print("\ew5");
-        Serial.print(Si1132UVIndex);
-        Serial.print("\ew6");
-        Serial.print(Si1132Visible);
-        Serial.print("\ew7");
-        Serial.print(Si1132IR);
-        Serial.print("\ew8");
+	Serial.print("w0");
 	Serial.print(battery);
+	Serial.print("\ew2");
+	Serial.print(Si1132UVIndex);
+	Serial.print("\ew3");
+	Serial.print(Si1132Visible);
+	Serial.print("\ew4");
+	Serial.print(Si1132IR);
+	Serial.print("\ew5");
+	if (WB_VERSION == 1) {
+		Serial.print(Si7020Temperature);
+		Serial.print("\ew6");
+		Serial.print(Si7020Humidity);
+		Serial.print("\ew7");
+		Serial.print(BMP180Temperature);
+		Serial.print("\ew8");
+		Serial.print(BMP180Pressure);
+		Serial.print("\ew9");
+		Serial.print(BMP180Altitude);
+	} else {
+		Serial.print(BME280Temperature);
+		Serial.print("\ew6");
+		Serial.print(BME280Pressure);
+		Serial.print("\ew7");
+		Serial.print(BME280Altitude);
+		Serial.print("\ew8");
+	}
+
 	Serial.print("\e");
 }
 
@@ -253,6 +307,14 @@ void getSi7020()
         Si7020Humidity = si7020.readHumidity();
 }
 
+void getBME280()
+{
+	BME280Temperature = bme.readTemperature();
+	BME280Pressure = (bme.readPressure()/100);
+	BME280Humidity = bme.readHumidity();
+	BME280Altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+}
+
 void displayBMP180()
 {
         tft.setTextColor(ILI9340_CYAN, backgroundColor);
@@ -269,17 +331,18 @@ void displayBMP180()
 	tft.setCharCursor(11, 13);
         tft.print(BMP180Altitude);
         tft.println(" meters   ");
+        delay(20);
 }
 
 void displaySi7020()
 {
         tft.setTextColor(ILI9340_YELLOW, backgroundColor);
-	tft.setCharCursor(7, 2);
+	tft.setCharCursor(7, 7);
         tft.print(Si7020Temperature);
         tft.println(" *C  ");
         delay(20);
 
-	tft.setCharCursor(11, 3);
+	tft.setCharCursor(11, 8);
         tft.print(Si7020Humidity);
         tft.println(" %  \n");
         delay(20);
@@ -287,23 +350,95 @@ void displaySi7020()
 
 void displaySi1132()
 {
-	tft.setCharCursor(11, 6);
+        tft.setTextColor(ILI9340_RED, backgroundColor);
+	tft.setCharCursor(11, 2);
         tft.print(Si1132UVIndex);
         tft.println("  ");
         delay(20);
 
-	tft.setCharCursor(10, 7);
+	tft.setCharCursor(10, 3);
         tft.print(Si1132Visible);
         tft.println(" Lux  ");
         delay(20);
 
-	tft.setCharCursor(5, 8);
+	tft.setCharCursor(5, 4);
         tft.print(Si1132IR);
         tft.println(" Lux  \n");
         delay(20);
 }
 
-void batteryCheck()
+void displayBME280()
+{
+        tft.setTextColor(ILI9340_CYAN, backgroundColor);
+	tft.setCharCursor(7, 7);
+        tft.print(BME280Temperature);
+        tft.println(" *C  ");
+        delay(20);
+
+	tft.setCharCursor(11, 8);
+        tft.print(BME280Pressure);
+        tft.println(" hPa  ");
+        delay(20);
+
+	tft.setCharCursor(11, 9);
+        tft.print(BME280Humidity);
+        tft.println(" %   ");
+        delay(20);
+
+        tft.setCharCursor(11, 10);
+        tft.print(BME280Altitude);
+        tft.println(" m   ");
+        delay(20);
+}
+
+void errorCheck()
+{
+        if ((read8(BME280_ADDRESS, BME280_REGISTER_CHIPID) != 0x60) &&
+                        (read8(BMP085_ADDRESS, BMP085_REGISTER_CHIPID) != 0x55)) {
+                if (!errorState) {
+                        tft.fillScreen(backgroundColor);
+			displayLabel();
+                }
+                errorState = 1;
+        } else if (errorState) {
+                if (read8(BME280_ADDRESS, BME280_REGISTER_CHIPID) != 0x60) {
+                        WB_VERSION = 1;
+                } else {
+                        WB_VERSION = 2;
+                }
+                si1132.begin();
+                if (WB_VERSION == 1) {
+                        bmp.begin();
+                        sensor_t sensor;
+                        bmp.getSensor(&sensor);
+                } else {
+                        if(!bme.begin()) {
+                        }
+                }
+                tft.fillScreen(backgroundColor);
+		displayLabel();
+                errorState = 0;
+        }
+        if (errorState) {
+                BMP180Temperature = 0;
+                BMP180Pressure = 0;
+                BMP180Altitude = 0;
+
+                Si7020Temperature = 0;
+                Si7020Humidity = 0;
+
+                BME280Temperature = 0;
+                BME280Pressure = 0;
+                BME280Humidity = 0;
+                BME280Altitude = 0;
+
+                Si1132UVIndex = 0;
+                Si1132Visible = 0;
+                Si1132IR = 0;
+        }
+}
+
+void readBattery()
 {
         battery = analogRead(A2)*1.094/1024/3.9*15.9;
 
@@ -324,6 +459,7 @@ void batteryCheck()
         if (batteryState)
                 battery = 0;
 
+	tft.setTextColor(ILI9340_GREEN, backgroundColor);
         tft.setCharCursor(21, 3);
         tft.print(battery);
         if (battery > 3.95) {
@@ -356,13 +492,31 @@ void batteryCheck()
 
 void loop(void)
 {
-        getBMP180();
-        getSi7020();
-        getSi1132();
-        displayBMP180();
-        displaySi7020();
-        displaySi1132();        
-	sendToHost();
+	displaySi1132();
+	if (WB_VERSION == 1) {
+		displayBMP180();
+                displaySi7020();
+        } else {
+                displayBME280();
+        }
 
-	batteryCheck();
+        if (!errorState) {
+                getSi1132();
+                if (WB_VERSION == 1) {
+                        getBMP180();
+                        getSi7020();
+                } else {
+                        getBME280();
+                }
+
+		sendToHost();
+        }
+
+        if (count > 5) {
+                errorCheck();
+                count = 0;
+        }
+        readBattery();
+
+        count++;
 }
