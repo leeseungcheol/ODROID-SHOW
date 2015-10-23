@@ -229,9 +229,18 @@ void getBMP180()
 
 void getSi1132()
 {
-        Si1132UVIndex = si1132.readUV()/100.0;
-        Si1132Visible = si1132.readVisible();
-        Si1132IR = si1132.readIR();
+        Si1132UVIndex = 0;
+        Si1132Visible = 0;
+        Si1132IR = 0;
+        for (int i = 0; i < 10; i++) {
+                Si1132Visible += si1132.readVisible();
+                Si1132IR += si1132.readIR();
+                Si1132UVIndex += si1132.readUV();
+        }
+        Si1132UVIndex /= 10;
+        Si1132UVIndex /= 100;
+        Si1132Visible /= 10;
+        Si1132IR /= 10;
 }
 
 void getSi7020()

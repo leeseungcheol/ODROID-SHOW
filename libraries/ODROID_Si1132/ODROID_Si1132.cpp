@@ -26,18 +26,18 @@ boolean ODROID_Si1132::begin(void)
 
   	writeParam(Si1132_PARAM_ALSIRADCMUX, Si1132_PARAM_ADCMUX_SMALLIR);  
   // fastest clocks, clock div 1
-  	writeParam(Si1132_PARAM_ALSIRADCGAIN, 0);
+	writeParam(Si1132_PARAM_ALSIRADCGAIN, 2);
   // take 511 clocks to measure
   	writeParam(Si1132_PARAM_ALSIRADCCOUNTER, Si1132_PARAM_ADCCOUNTER_511CLK);
   // in high range mode
-  	//writeParam(Si1132_PARAM_ALSIRADCMISC, Si1132_PARAM_ALSIRADCMISC_RANGE);
+	writeParam(Si1132_PARAM_ALSIRADCMISC, Si1132_PARAM_ALSIRADCMISC_RANGE);
 
   // fastest clocks
-  	writeParam(Si1132_PARAM_ALSVISADCGAIN, 3);
+	writeParam(Si1132_PARAM_ALSVISADCGAIN, 3);
   // take 511 clocks to measure
   	writeParam(Si1132_PARAM_ALSVISADCCOUNTER, Si1132_PARAM_ADCCOUNTER_511CLK);
   // in high range mode (not normal signal)
-  	//writeParam(Si1132_PARAM_ALSVISADCMISC, Si1132_PARAM_ALSVISADCMISC_VISRANGE);
+	writeParam(Si1132_PARAM_ALSVISADCMISC, Si1132_PARAM_ALSVISADCMISC_VISRANGE);
 
 	write8(Si1132_REG_MEASRATE0, 0xFF);
 	write8(Si1132_REG_COMMAND, Si1132_ALS_AUTO);
@@ -47,44 +47,20 @@ boolean ODROID_Si1132::begin(void)
 
 uint16_t ODROID_Si1132::readUV()
 {
+	delay(10);
 	return read16(0x2c);
 }
 
 float ODROID_Si1132::readIR()
 {
-	float lx = 0;
-
-	for (int i = 0; i < 5; i++) {
-		lx += read16(0x24);
-		delay(20);
-	}
-	lx = lx/5;
-	// adc offset
-	if (lx > 256)
-		lx -= 256;
-	else
-		lx = 0;
-
-	return lx;
+	delay(10);
+	return read16(0x24) - 250;
 }
 
 float ODROID_Si1132::readVisible()
 {
-	float lx = 0;
-
-	for (int i = 0; i < 5; i++) {
-		lx += read16(0x22);
-		delay(20);
-	}
-	lx = lx/5;
-	// adc offset
-	if (lx > 256)
-		lx -= 256;
-	else
-		lx = 0;
-	lx = lx*0.7;
-
-	return lx;
+	delay(10);
+	return read16(0x22) - 250;
 }
 
 void ODROID_Si1132::reset()
